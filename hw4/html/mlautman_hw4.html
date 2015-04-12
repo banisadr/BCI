@@ -1,0 +1,1167 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>mlautman_hw4</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-02-28"><meta name="DC.source" content="mlautman_hw4.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><p></p><pre class="codeinput">close <span class="string">all</span>; clear <span class="string">all</span>; clc;
+</pre><p></p><p></p><pre class="codeinput">dataset = <span class="string">'I521_A0004_D001'</span>;
+me = <span class="string">'mlautman'</span>;
+pass_file = <span class="string">'mla_ieeglogin.bin'</span>;
+[T, session] = evalc(<span class="string">'IEEGSession(dataset, me, pass_file)'</span>);
+data = session.data;
+sample_rate = data.sampleRate ;
+durration = data.channels(1).get_tsdetails.getDuration;
+voltage_conv = data.channels(1).get_tsdetails.getVoltageConversion;
+test_c = session.data.channels(1);
+train_c = session.data.channels(2);
+test = data.getvalues(1:test_c.getNrSamples,1);
+train = data.getvalues(1:train_c.getNrSamples,2);
+train_len_s = session.data.channels(2).get_tsdetails.getDuration;
+test_len_s = session.data.channels(1).get_tsdetails.getDuration;
+
+test_ann = data.annLayer(1);
+
+train_ann = data.annLayer(2);
+
+n_train_ev = train_ann.getNrEvents;
+
+train_event = train_ann.getEvents(1,1);
+train_events(n_train_ev) = train_event;
+train_events(1) = train_event;
+train_classes = zeros(1, n_train_ev);
+train_classes(1) = train_event.description-48;
+
+train_hfo_cnt = zeros(1,2);
+train_hfo_cnt(train_classes(1)) = train_hfo_cnt(train_classes(1)) + 1;
+<span class="keyword">for</span> i=2:n_train_ev
+    train_events(i) = train_ann.getNextEvents(train_events(i-1),1);
+    train_classes(i) = train_events(i).description-48;
+<span class="keyword">end</span>
+
+n_test_ev = test_ann.getNrEvents;
+
+test_event = test_ann.getEvents(1,1);
+test_events(n_test_ev) = test_event;
+test_events(1) = test_event;
+test_classes = zeros(1, n_test_ev);
+test_classes(1) = test_event.description-48;
+
+test_hfo_cnt = zeros(1,2);
+test_hfo_cnt(test_classes(1)) = test_hfo_cnt(test_classes(1)) + 1;
+<span class="keyword">for</span> i=2:n_test_ev
+    test_events(i) = test_ann.getNextEvents(test_events(i-1),1);
+    test_classes(i) = test_events(i).description-48;
+<span class="keyword">end</span>
+
+
+hfos= find(train_classes==2);
+artifacts = find(train_classes==1);
+
+number_of_hfos = length(hfos)
+number_of_artifacts = length(artifacts)
+</pre><pre class="codeoutput">
+number_of_hfos =
+
+   101
+
+
+number_of_artifacts =
+
+    99
+
+</pre><p></p><pre class="codeinput">figure(1)
+
+subplot(1,2,1)
+a1 = train_events(artifacts(1));
+s = ceil(a1.start/train_len_s*length(train));
+e = ceil(a1.stop/train_len_s*length(train));
+vals = train(s:e);
+time = (1:length(vals))/sample_rate;
+plot(time, vals)
+title(<span class="string">'First tagged Artifact'</span>)
+xlabel(<span class="string">'Time (S)'</span>)
+ylabel(<span class="string">'Voltage (V)'</span>)
+xlim([0,max(time)])
+set(gca,<span class="string">'YTick'</span>,[])
+
+subplot(1,2,2)
+hfo1 = train_events(hfos(1));
+
+s = ceil(hfo1.start/train_len_s*length(train));
+e = ceil(hfo1.stop/train_len_s*length(train));
+vals = train(s:e);
+time = (1:length(vals))/sample_rate;
+plot(time, vals)
+title(<span class="string">'First tagged HFO'</span>)
+xlabel(<span class="string">'Time (S)'</span>)
+ylabel(<span class="string">'Voltage (V)'</span>)
+xlim([0,max(time)])
+set(gca,<span class="string">'YTick'</span>,[])
+</pre><img vspace="5" hspace="5" src="mlautman_hw4_01.png" alt=""> <p></p><p></p><pre class="codeinput"><span class="comment">%</span>
+<span class="comment">% Fs = sample_rate;  % Sampling Frequency</span>
+<span class="comment">% N      = 100;   % Order</span>
+<span class="comment">% Fstop1 = 10;    % First Stopband Frequency</span>
+<span class="comment">% Fpass1 = 60;    % First Passband Frequency</span>
+<span class="comment">% Fpass2 = 500;   % Second Passband Frequency</span>
+<span class="comment">% Fstop2 = 600;   % Second Stopband Frequency</span>
+<span class="comment">% Wstop1 = 1;     % First Stopband Weight</span>
+<span class="comment">% Wpass  = 1;     % Passband Weight</span>
+<span class="comment">% Wstop2 = 1;  % Second Stopband Weight</span>
+<span class="comment">% dens   = 100;   % Density Factor</span>
+<span class="comment">%</span>
+<span class="comment">% filter = firpm(N, [0 Fstop1 Fpass1 Fpass2 Fstop2 Fs/2]/(Fs/2), [0 0 1 1 0 0], [Wstop1 Wpass Wstop2], {dens})*3.45e2;</span>
+load(<span class="string">'Coefficients.mat'</span>);
+figure(2)
+
+subplot(1,2,1)
+hold <span class="string">on</span>
+
+a1 = train_events(artifacts(1));
+
+s = ceil(a1.start/train_len_s*length(train));
+e = ceil(a1.stop/train_len_s*length(train));
+
+vals = train(s:e);
+time = (1:length(vals))/sample_rate;
+plot(time, vals, <span class="string">'b'</span>)
+vals = filtfilt(Num,1,vals);
+plot(time, vals, <span class="string">'r'</span>)
+title(<span class="string">'First tagged Artifact with bandpass filter'</span>)
+xlabel(<span class="string">'Time (S)'</span>)
+ylabel(<span class="string">'Voltage (V)'</span>)
+xlim([0,max(time)])
+set(gca,<span class="string">'YTick'</span>,[])
+legend(<span class="string">'Raw'</span>, <span class="string">'Filtered'</span>)
+
+subplot(1,2,2)
+hold <span class="string">on</span>
+hfo1 = train_events(hfos(1));
+
+s = ceil(hfo1.start/train_len_s*length(train));
+e = ceil(hfo1.stop/train_len_s*length(train));
+
+vals = train(s:e);
+time = (1:length(vals))/sample_rate;
+plot(time, vals, <span class="string">'b'</span>)
+vals = filtfilt(Num,1,vals);
+plot(time, vals, <span class="string">'r'</span>)
+title(<span class="string">'First tagged HFO with bandpass filter'</span>)
+xlabel(<span class="string">'Time (S)'</span>)
+ylabel(<span class="string">'Voltage (V)'</span>)
+xlim([0,max(time)])
+set(gca,<span class="string">'YTick'</span>,[])
+legend(<span class="string">'Raw'</span>, <span class="string">'Filtered'</span>)
+</pre><img vspace="5" hspace="5" src="mlautman_hw4_02.png" alt=""> <p></p><p></p><p></p><pre class="codeinput">trainFeats = zeros(n_train_ev,2);
+testFeats = zeros(n_test_ev,2);
+
+line_length = @(x) sum(abs(diff(x)));
+area = @(x) sum(abs(x));
+
+figure(3)
+hold <span class="string">on</span>
+
+<span class="keyword">for</span> i=1:n_train_ev
+
+    s = max(ceil(train_events(i).start/train_len_s*length(train)),1);
+    e = min(ceil(train_events(i).stop/train_len_s*length(train)),length(train));
+
+
+    trainFeats(i,1)=line_length(train(s:e));
+    trainFeats(i,2)=area(train(s:e));
+
+    <span class="keyword">if</span> train_events(i).description == <span class="string">'1'</span>
+        scatter(trainFeats(i,1), trainFeats(i,2), <span class="string">'r'</span>)
+    <span class="keyword">else</span>
+        scatter(trainFeats(i,1), trainFeats(i,2), <span class="string">'b'</span>)
+    <span class="keyword">end</span>
+
+<span class="keyword">end</span>
+legend(<span class="string">'HFO'</span>, <span class="string">'Artifact'</span>)
+
+
+
+<span class="keyword">for</span> i=1:n_test_ev
+
+    s = max(ceil(test_events(i).start/test_len_s*length(test)),1);
+    e = min(ceil(test_events(i).stop/test_len_s*length(test)),length(test));
+    testFeats(i,1)=line_length(test(s:e));
+    testFeats(i,2)=area(test(s:e));
+
+<span class="comment">%     if test_events(i).description == '1'</span>
+<span class="comment">%         scatter(testFeats(i,1), testFeats(i,2), 'k')</span>
+<span class="comment">%     else</span>
+<span class="comment">%         scatter(testFeats(i,1), testFeats(i,2), 'g')</span>
+<span class="comment">%     end</span>
+<span class="keyword">end</span>
+
+title(<span class="string">'Line Length vs Area for HFO and artifacts'</span>)
+xlabel(<span class="string">'Line Length'</span>)
+ylabel(<span class="string">'Area'</span>)
+</pre><img vspace="5" hspace="5" src="mlautman_hw4_03.png" alt=""> <p></p><pre class="codeinput">mean_train = mean(trainFeats,1);
+std_train = std(trainFeats,1);
+
+trainFeats = bsxfun(@minus, trainFeats, mean_train);
+trainFeats = bsxfun(@rdivide, trainFeats, std_train);
+
+testFeats = bsxfun(@minus, testFeats, mean_train);
+testFeats = bsxfun(@rdivide, testFeats, std_train);
+</pre><p></p><p></p><p></p><p></p><p></p><pre class="codeinput">log_reg = mnrfit(trainFeats, train_classes);
+
+train_pred_prob = mnrval(log_reg, trainFeats);
+[~,Y_train_pred] = max(train_pred_prob,[],2);
+train_error_percent = sum(Y_train_pred' ~= train_classes)/length(train_classes)
+</pre><pre class="codeoutput">
+train_error_percent =
+
+    0.1250
+
+</pre><p></p><pre class="codeinput">test_pred_prob = mnrval(log_reg, testFeats);
+[~,Y_test_pred] = max(test_pred_prob,[],2);
+test_error_percent = sum(Y_test_pred' ~= test_classes)/length(test_classes)
+</pre><pre class="codeoutput">
+test_error_percent =
+
+    0.1357
+
+</pre><p></p><p></p><pre class="codeinput">knn_pred_test = knnclassify(testFeats,trainFeats, train_classes);
+knn_pred_train = knnclassify(trainFeats,trainFeats, train_classes);
+
+knn_test_error = sum(knn_pred_test' ~= test_classes)/length(test_classes)
+knn_train_error = sum(knn_pred_train' ~= train_classes)/length(train_classes)
+</pre><pre class="codeoutput">
+knn_test_error =
+
+    0.1738
+
+
+knn_train_error =
+
+     0
+
+</pre><p></p><pre class="codeinput">train_classesT = train_classes';
+test_classesT = test_classes';
+
+svm_model = svmtrain(train_classesT, trainFeats);
+
+[T, test_svm_pred_class, test_acc_svm, ~] = <span class="keyword">...</span>
+    evalc(<span class="string">'svmpredict(test_classesT, testFeats, svm_model)'</span>);
+[T, train_svm_pred_class, train_acc_svm, ~] = <span class="keyword">...</span>
+    evalc(<span class="string">'svmpredict(train_classesT, trainFeats, svm_model)'</span>);
+
+test_err_svm = sum(test_svm_pred_class' ~= test_classes)/length(test_classes)
+train_err_svm = sum(train_svm_pred_class' ~= train_classes)/length(train_classes)
+</pre><pre class="codeoutput">
+test_err_svm =
+
+    0.1119
+
+
+train_err_svm =
+
+    0.1150
+
+</pre><p></p><pre class="codeinput">training_1 = trainFeats(train_classes==1, :);
+training_2 = trainFeats(train_classes~=1, :);
+
+[X,Y] = meshgrid(-2:.01:3, -3:.01:5);
+[n,d] = size(X);
+X = reshape(X, [n*d,1]);
+Y = reshape(Y, [n*d,1]);
+F = [X,Y];
+XC = ones(length(X),1);
+
+figure(4)
+
+[T, pred_class, ~, ~] = <span class="keyword">...</span>
+    evalc(<span class="string">'svmpredict(XC, F, svm_model)'</span>);
+
+hold <span class="string">on</span>
+Xy = X(find(pred_class==1));
+Xc = X(find(pred_class~=1));
+Yy = Y(find(pred_class==1));
+Yc = Y(find(pred_class~=1));
+scatter(Xy, Yy, <span class="string">'.'</span>, <span class="string">'y'</span>)
+scatter(Xc, Yc, <span class="string">'.'</span>, <span class="string">'c'</span>)
+
+scatter(training_1(:,1), training_1(:,2), <span class="string">'*'</span>, <span class="string">'r'</span>)
+scatter(training_2(:,1), training_2(:,2), <span class="string">'*'</span>, <span class="string">'b'</span>)
+title(<span class="string">'SVM decision boundary for LL vs. Area'</span>)
+xlabel(<span class="string">'Line Length'</span>)
+ylabel(<span class="string">'Area'</span>)
+legend(<span class="string">'Artifact Region'</span>, <span class="string">'HFO Region'</span>, <span class="string">'Artifact'</span>, <span class="string">'HFO'</span>)
+
+
+
+figure(5)
+
+knn_boundary = knnclassify(F, trainFeats, train_classes);
+
+hold <span class="string">on</span>
+Xy = X(find(knn_boundary==1));
+Xc = X(find(knn_boundary~=1));
+Yy = Y(find(knn_boundary==1));
+Yc = Y(find(knn_boundary~=1));
+scatter(Xy, Yy, <span class="string">'.'</span>, <span class="string">'y'</span>)
+scatter(Xc, Yc, <span class="string">'.'</span>, <span class="string">'c'</span>)
+
+scatter(training_1(:,1), training_1(:,2), <span class="string">'*'</span>, <span class="string">'r'</span>)
+scatter(training_2(:,1), training_2(:,2), <span class="string">'*'</span>, <span class="string">'b'</span>)
+title(<span class="string">'K-NN decision boundary for LL vs. Area'</span>)
+xlabel(<span class="string">'Line Length'</span>)
+ylabel(<span class="string">'Area'</span>)
+legend(<span class="string">'Artifact Region'</span>, <span class="string">'HFO Region'</span>, <span class="string">'Artifact'</span>, <span class="string">'HFO'</span>)
+
+
+
+figure(6)
+
+[~,lr_boundary] = max(mnrval(log_reg, F),[],2);
+
+hold <span class="string">on</span>
+Xy = X(find(lr_boundary==1));
+Xc = X(find(lr_boundary~=1));
+Yy = Y(find(lr_boundary==1));
+Yc = Y(find(lr_boundary~=1));
+scatter(Xy, Yy, <span class="string">'.'</span>, <span class="string">'y'</span>)
+scatter(Xc, Yc, <span class="string">'.'</span>, <span class="string">'c'</span>)
+
+scatter(training_1(:,1), training_1(:,2), <span class="string">'*'</span>, <span class="string">'r'</span>)
+scatter(training_2(:,1), training_2(:,2), <span class="string">'*'</span>, <span class="string">'b'</span>)
+title(<span class="string">'Log Reg decision boundary for LL vs. Area'</span>)
+xlabel(<span class="string">'Line Length'</span>)
+ylabel(<span class="string">'Area'</span>)
+legend(<span class="string">'Artifact Region'</span>, <span class="string">'HFO Region'</span>, <span class="string">'Artifact'</span>, <span class="string">'HFO'</span>)
+</pre><img vspace="5" hspace="5" src="mlautman_hw4_04.png" alt=""> <img vspace="5" hspace="5" src="mlautman_hw4_05.png" alt=""> <img vspace="5" hspace="5" src="mlautman_hw4_06.png" alt=""> <p></p><p></p><p></p><pre class="codeinput">clear <span class="string">folds</span>
+indices = randperm(length(trainFeats(:,1)));
+folds{10} = trainFeats(1);
+<span class="keyword">for</span> i = 1:10
+    s = max(1,round(length(indices)/10 * (i-1) + 1));
+    e = min(length(indices), round(length(indices)/10 * i));
+    folds{i} = indices(s:e)';
+<span class="keyword">end</span>
+
+length(unique([folds{:}]))
+</pre><pre class="codeoutput">
+ans =
+
+   200
+
+</pre><p></p><pre class="codeinput">[n, d] = size(trainFeats);
+fold_n = 10;
+fold_len = n / fold_n;
+
+train_folds = zeros(fold_len * (fold_n - 1), d);
+train_fold_class = zeros(fold_len * (fold_n - 1), 1);
+test_folds = zeros(fold_len, d);
+test_fold_class = zeros(fold_len, 1);
+incorrect_pred = 0;
+
+<span class="keyword">for</span> i = 1:fold_n
+    f_cnt = 0;
+
+    <span class="comment">% generate test and train sets</span>
+    <span class="keyword">for</span> j = 1:10
+
+        s = fold_len * (j - 1) + 1;
+        e = fold_len * j;
+
+        <span class="keyword">if</span> i == j
+
+            test_folds(1:fold_len, 1:d) = trainFeats(folds{j}, 1:d);
+            test_fold_class(1:fold_len) = train_classes(folds{j});
+
+        <span class="keyword">else</span>
+            f_cnt = f_cnt + 1;
+
+            fold_s = fold_len * (f_cnt - 1) + 1;
+            fold_e = fold_len * f_cnt;
+
+            train_folds(fold_s:fold_e, 1:d) = trainFeats(folds{j}, 1:d);
+            train_fold_class(fold_s:fold_e) = train_classes(folds{j});
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    <span class="comment">% run learning algorithms</span>
+    knn_pred_test = knnclassify(test_folds, train_folds, train_fold_class);
+    incorrect_pred = incorrect_pred + sum(knn_pred_test ~= test_fold_class);
+
+<span class="keyword">end</span>
+validation_error = incorrect_pred / n
+</pre><pre class="codeoutput">
+validation_error =
+
+    0.2050
+
+</pre><p></p><p></p><pre class="codeinput">knn_train_error = zeros(1,30);
+validation_error = zeros(1,30);
+
+<span class="keyword">for</span> k = 1:30
+    train_folds = zeros(fold_len * (fold_n - 1), d);
+    train_fold_class = zeros(fold_len * (fold_n - 1), 1);
+
+    test_folds = zeros(fold_len, d);
+    test_fold_class = zeros(fold_len, 1);
+    incorrect_pred = 0;
+
+    <span class="keyword">for</span> i = 1:fold_n
+        f_cnt = 0;
+
+        <span class="comment">% generate test and train sets</span>
+        <span class="keyword">for</span> j = 1:fold_n
+
+            s = fold_len * (j - 1) + 1;
+            e = fold_len * j;
+
+            <span class="keyword">if</span> i == j
+
+                test_folds(1:fold_len, 1:d) = trainFeats(folds{j}, 1:d);
+                test_fold_class(1:fold_len) = train_classes(folds{j});
+
+            <span class="keyword">else</span>
+                f_cnt = f_cnt + 1;
+
+                fold_s = fold_len * (f_cnt - 1) + 1;
+                fold_e = fold_len * f_cnt;
+
+                train_folds(fold_s:fold_e, 1:d) = trainFeats(folds{j}, 1:d);
+                train_fold_class(fold_s:fold_e) = train_classes(folds{j});
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+        <span class="comment">% run learning algorithms</span>
+        knn_pred_test = knnclassify(test_folds, train_folds, train_fold_class, k);
+
+        incorrect_pred = incorrect_pred + sum(knn_pred_test ~= test_fold_class);
+
+    <span class="keyword">end</span>
+
+    knn_pred_train = knnclassify(trainFeats, trainFeats, train_classes, k);
+    knn_train_error(k) = sum(train_classes ~= knn_pred_train')/length(train_classes);
+    validation_error(k) = incorrect_pred / (fold_len * fold_n);
+
+<span class="keyword">end</span>
+
+figure(7)
+hold <span class="string">on</span>
+plot(1:30, validation_error, <span class="string">'b-o'</span>);
+plot(1:30, knn_train_error, <span class="string">'r-o'</span>);
+title(<span class="string">'Validation and training error for k-NN'</span>)
+xlabel(<span class="string">'k'</span>)
+ylabel(<span class="string">'error'</span>)
+legend(<span class="string">'validation error'</span>, <span class="string">'training error'</span>)
+</pre><img vspace="5" hspace="5" src="mlautman_hw4_07.png" alt=""> <p></p><pre class="codeinput">[lowest_error, best_k] = min(validation_error)
+</pre><pre class="codeoutput">
+lowest_error =
+
+    0.1150
+
+
+best_k =
+
+     7
+
+</pre><p></p><p></p><pre class="codeinput">knn_pred_test = knnclassify(testFeats,trainFeats, train_classes, best_k);
+knn_test_error = sum(knn_pred_test' ~= test_classes)/length(test_classes)
+</pre><pre class="codeoutput">
+knn_test_error =
+
+    0.1214
+
+</pre><p></p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%%
+% <latex>
+% \title{BE 521 - Homework 4\\{\normalsize Spring 2015}}
+% \author{Mike Lautman}
+% \date{\today}
+% \maketitle
+% \textbf{Objective:} Computational modeling of neurons.
+% </latex>
+
+close all; clear all; clc; 
+%%
+% <latex>
+% \section*{1 Simulating the Staba Detector}
+% </latex>
+
+%%
+% <latex>
+% \subsection*{1.1 Number of Samples by Class}
+% </latex>
+
+
+dataset = 'I521_A0004_D001';
+me = 'mlautman';
+pass_file = 'mla_ieeglogin.bin';
+[T, session] = evalc('IEEGSession(dataset, me, pass_file)');
+data = session.data;
+sample_rate = data.sampleRate ;
+durration = data.channels(1).get_tsdetails.getDuration;
+voltage_conv = data.channels(1).get_tsdetails.getVoltageConversion;
+test_c = session.data.channels(1);
+train_c = session.data.channels(2);
+test = data.getvalues(1:test_c.getNrSamples,1);
+train = data.getvalues(1:train_c.getNrSamples,2);
+train_len_s = session.data.channels(2).get_tsdetails.getDuration;
+test_len_s = session.data.channels(1).get_tsdetails.getDuration;
+
+test_ann = data.annLayer(1);
+
+train_ann = data.annLayer(2);
+
+n_train_ev = train_ann.getNrEvents;
+
+train_event = train_ann.getEvents(1,1);
+train_events(n_train_ev) = train_event;
+train_events(1) = train_event;
+train_classes = zeros(1, n_train_ev);
+train_classes(1) = train_event.description-48;
+
+train_hfo_cnt = zeros(1,2);
+train_hfo_cnt(train_classes(1)) = train_hfo_cnt(train_classes(1)) + 1;
+for i=2:n_train_ev
+    train_events(i) = train_ann.getNextEvents(train_events(i-1),1);
+    train_classes(i) = train_events(i).description-48;
+end
+
+n_test_ev = test_ann.getNrEvents;
+
+test_event = test_ann.getEvents(1,1);
+test_events(n_test_ev) = test_event;
+test_events(1) = test_event;
+test_classes = zeros(1, n_test_ev);
+test_classes(1) = test_event.description-48;
+
+test_hfo_cnt = zeros(1,2);
+test_hfo_cnt(test_classes(1)) = test_hfo_cnt(test_classes(1)) + 1;
+for i=2:n_test_ev
+    test_events(i) = test_ann.getNextEvents(test_events(i-1),1);
+    test_classes(i) = test_events(i).description-48;
+end
+
+
+hfos= find(train_classes==2);
+artifacts = find(train_classes==1);
+
+number_of_hfos = length(hfos)
+number_of_artifacts = length(artifacts)
+
+%%
+% <latex>
+% \subsection*{1.2 Plot 1 HFO and 1 Artifact}
+% </latex>
+
+figure(1)
+
+subplot(1,2,1)
+a1 = train_events(artifacts(1));
+s = ceil(a1.start/train_len_s*length(train));
+e = ceil(a1.stop/train_len_s*length(train));
+vals = train(s:e);
+time = (1:length(vals))/sample_rate;
+plot(time, vals)
+title('First tagged Artifact')
+xlabel('Time (S)')
+ylabel('Voltage (V)')
+xlim([0,max(time)])
+set(gca,'YTick',[])
+
+subplot(1,2,2)
+hfo1 = train_events(hfos(1));
+
+s = ceil(hfo1.start/train_len_s*length(train));
+e = ceil(hfo1.stop/train_len_s*length(train));
+vals = train(s:e);
+time = (1:length(vals))/sample_rate;
+plot(time, vals)
+title('First tagged HFO')
+xlabel('Time (S)')
+ylabel('Voltage (V)')
+xlim([0,max(time)])
+set(gca,'YTick',[])
+
+
+%%
+% <latex>
+% \subsection*{1.3 FIR}
+% </latex>
+
+%%
+% <latex>
+% \subsection*{1.4 Plot 1 HFO and 1 Artifact with FIR}
+% </latex>
+
+
+% 
+% Fs = sample_rate;  % Sampling Frequency
+% N      = 100;   % Order
+% Fstop1 = 10;    % First Stopband Frequency
+% Fpass1 = 60;    % First Passband Frequency
+% Fpass2 = 500;   % Second Passband Frequency
+% Fstop2 = 600;   % Second Stopband Frequency
+% Wstop1 = 1;     % First Stopband Weight
+% Wpass  = 1;     % Passband Weight
+% Wstop2 = 1;  % Second Stopband Weight
+% dens   = 100;   % Density Factor
+% 
+% filter = firpm(N, [0 Fstop1 Fpass1 Fpass2 Fstop2 Fs/2]/(Fs/2), [0 0 1 1 0 0], [Wstop1 Wpass Wstop2], {dens})*3.45e2;
+load('Coefficients.mat');
+figure(2)
+
+subplot(1,2,1)
+hold on 
+
+a1 = train_events(artifacts(1));
+
+s = ceil(a1.start/train_len_s*length(train));
+e = ceil(a1.stop/train_len_s*length(train));
+
+vals = train(s:e);
+time = (1:length(vals))/sample_rate;
+plot(time, vals, 'b')
+vals = filtfilt(Num,1,vals);
+plot(time, vals, 'r')
+title('First tagged Artifact with bandpass filter')
+xlabel('Time (S)')
+ylabel('Voltage (V)')
+xlim([0,max(time)])
+set(gca,'YTick',[])
+legend('Raw', 'Filtered')
+
+subplot(1,2,2)
+hold on 
+hfo1 = train_events(hfos(1));
+
+s = ceil(hfo1.start/train_len_s*length(train));
+e = ceil(hfo1.stop/train_len_s*length(train));
+
+vals = train(s:e);
+time = (1:length(vals))/sample_rate;
+plot(time, vals, 'b')
+vals = filtfilt(Num,1,vals);
+plot(time, vals, 'r')
+title('First tagged HFO with bandpass filter')
+xlabel('Time (S)')
+ylabel('Voltage (V)')
+xlim([0,max(time)])
+set(gca,'YTick',[])
+legend('Raw', 'Filtered')
+
+
+
+%%
+% <latex>
+% \subsection*{1.5 Issues with Staba's Method}
+% Detecting HFO's poses a complex problem for automated systems. The
+% data we have been presented is extreemely noisy which makes tagging HFO's
+% very difficult. By normalizing the HFO and artifact recordings to zero
+% mean and unit standard deviation, the method increases the noise on low
+% amplitude signals causing them to become nearly indistinguishable from 
+% HFOs. 
+% </latex>
+
+
+%%
+% <latex>
+% \section*{2 Defining Features for HFOs}
+% </latex>
+
+%%
+% <latex>
+% \subsection*{2.1 }
+% </latex>
+
+trainFeats = zeros(n_train_ev,2);
+testFeats = zeros(n_test_ev,2);
+
+line_length = @(x) sum(abs(diff(x)));
+area = @(x) sum(abs(x));
+
+figure(3)
+hold on 
+
+for i=1:n_train_ev
+    
+    s = max(ceil(train_events(i).start/train_len_s*length(train)),1);
+    e = min(ceil(train_events(i).stop/train_len_s*length(train)),length(train));
+
+
+    trainFeats(i,1)=line_length(train(s:e));
+    trainFeats(i,2)=area(train(s:e));
+
+    if train_events(i).description == '1' 
+        scatter(trainFeats(i,1), trainFeats(i,2), 'r')
+    else
+        scatter(trainFeats(i,1), trainFeats(i,2), 'b')
+    end
+
+end
+legend('HFO', 'Artifact')
+
+
+
+for i=1:n_test_ev
+    
+    s = max(ceil(test_events(i).start/test_len_s*length(test)),1);
+    e = min(ceil(test_events(i).stop/test_len_s*length(test)),length(test));
+    testFeats(i,1)=line_length(test(s:e));
+    testFeats(i,2)=area(test(s:e));
+
+%     if test_events(i).description == '1' 
+%         scatter(testFeats(i,1), testFeats(i,2), 'k')
+%     else
+%         scatter(testFeats(i,1), testFeats(i,2), 'g')
+%     end
+end
+
+title('Line Length vs Area for HFO and artifacts')
+xlabel('Line Length')
+ylabel('Area')
+
+
+%%
+% <latex>
+% \subsection*{2.2 Normalization}
+% </latex>
+mean_train = mean(trainFeats,1);
+std_train = std(trainFeats,1);
+
+trainFeats = bsxfun(@minus, trainFeats, mean_train);
+trainFeats = bsxfun(@rdivide, trainFeats, std_train);
+
+testFeats = bsxfun(@minus, testFeats, mean_train);
+testFeats = bsxfun(@rdivide, testFeats, std_train);
+
+
+%%
+% <latex>
+% \subsection*{2.2a Normalization}
+% mean and standard deviation
+% </latex>
+
+%%
+% <latex>
+% \subsection*{2.2b Normalization for K-NN}
+% Normalization is essential in computing the distance metric for k-NN.
+% Without normalizing, if a single feature had a standard deviation of 3
+% times another feature, the second feature would have disproportionately
+% less influence on the distance calculation. 
+% </latex>
+
+
+%%
+% <latex>
+% \subsection*{2.2c Why use the training data mean and std?}
+% When normalizing the test data we use the mean and standard deviation
+% from the training data. In general, the test not available at the time 
+% the model is being built so we use the training data when building the 
+% preprocessing tranformations to simulate this. 
+% </latex>
+
+
+%%
+% <latex>
+% \section*{3 Comparing Classifiers}
+% </latex>
+
+
+%%
+% <latex>
+% \subsection*{3.1 Training Error}
+% </latex>
+
+
+log_reg = mnrfit(trainFeats, train_classes);
+
+train_pred_prob = mnrval(log_reg, trainFeats);
+[~,Y_train_pred] = max(train_pred_prob,[],2);
+train_error_percent = sum(Y_train_pred' ~= train_classes)/length(train_classes)
+
+%%
+% <latex>
+% \subsection*{3.1 Test Error}
+% </latex>
+
+test_pred_prob = mnrval(log_reg, testFeats);
+[~,Y_test_pred] = max(test_pred_prob,[],2);
+test_error_percent = sum(Y_test_pred' ~= test_classes)/length(test_classes)
+
+
+%%
+% <latex>
+% \subsection*{3.2 Test Error > Train Error}
+% It is reasonable for the Test error to be greater thant the training
+% error because the model was optimized to minimize misclassification 
+% errors on the training data and not the test data. In that way, the test
+% data error gives us an idea of how well the learning algorithm
+% generalizes to unseen data.
+% </latex>
+
+
+%%
+% <latex>
+% \subsection*{3.3a K-NN testing error}
+% </latex>
+knn_pred_test = knnclassify(testFeats,trainFeats, train_classes);
+knn_pred_train = knnclassify(trainFeats,trainFeats, train_classes);
+
+knn_test_error = sum(knn_pred_test' ~= test_classes)/length(test_classes)
+knn_train_error = sum(knn_pred_train' ~= train_classes)/length(train_classes)
+
+
+
+
+%%
+% <latex>
+% \subsection*{3.4 SVM defaults}
+% </latex>
+train_classesT = train_classes';
+test_classesT = test_classes';
+
+svm_model = svmtrain(train_classesT, trainFeats);
+
+[T, test_svm_pred_class, test_acc_svm, ~] = ...
+    evalc('svmpredict(test_classesT, testFeats, svm_model)');
+[T, train_svm_pred_class, train_acc_svm, ~] = ...
+    evalc('svmpredict(train_classesT, trainFeats, svm_model)');
+
+test_err_svm = sum(test_svm_pred_class' ~= test_classes)/length(test_classes)
+train_err_svm = sum(train_svm_pred_class' ~= train_classes)/length(train_classes)
+
+%%
+% <latex>
+% \subsection*{3.5 Decision Boundary}
+% </latex>
+
+
+training_1 = trainFeats(train_classes==1, :);
+training_2 = trainFeats(train_classes~=1, :);
+
+[X,Y] = meshgrid(-2:.01:3, -3:.01:5);
+[n,d] = size(X);
+X = reshape(X, [n*d,1]);
+Y = reshape(Y, [n*d,1]);
+F = [X,Y];
+XC = ones(length(X),1);
+
+figure(4)
+
+[T, pred_class, ~, ~] = ...
+    evalc('svmpredict(XC, F, svm_model)');
+    
+hold on 
+Xy = X(find(pred_class==1));
+Xc = X(find(pred_class~=1));
+Yy = Y(find(pred_class==1));
+Yc = Y(find(pred_class~=1));
+scatter(Xy, Yy, '.', 'y')
+scatter(Xc, Yc, '.', 'c')
+
+scatter(training_1(:,1), training_1(:,2), '*', 'r')
+scatter(training_2(:,1), training_2(:,2), '*', 'b')
+title('SVM decision boundary for LL vs. Area')
+xlabel('Line Length')
+ylabel('Area')
+legend('Artifact Region', 'HFO Region', 'Artifact', 'HFO')
+
+
+
+figure(5)
+
+knn_boundary = knnclassify(F, trainFeats, train_classes);
+
+hold on 
+Xy = X(find(knn_boundary==1));
+Xc = X(find(knn_boundary~=1));
+Yy = Y(find(knn_boundary==1));
+Yc = Y(find(knn_boundary~=1));
+scatter(Xy, Yy, '.', 'y')
+scatter(Xc, Yc, '.', 'c')
+
+scatter(training_1(:,1), training_1(:,2), '*', 'r')
+scatter(training_2(:,1), training_2(:,2), '*', 'b')
+title('K-NN decision boundary for LL vs. Area')
+xlabel('Line Length')
+ylabel('Area')
+legend('Artifact Region', 'HFO Region', 'Artifact', 'HFO')
+
+
+
+figure(6)
+
+[~,lr_boundary] = max(mnrval(log_reg, F),[],2);
+
+hold on 
+Xy = X(find(lr_boundary==1));
+Xc = X(find(lr_boundary~=1));
+Yy = Y(find(lr_boundary==1));
+Yc = Y(find(lr_boundary~=1));
+scatter(Xy, Yy, '.', 'y')
+scatter(Xc, Yc, '.', 'c')
+
+scatter(training_1(:,1), training_1(:,2), '*', 'r')
+scatter(training_2(:,1), training_2(:,2), '*', 'b')
+title('Log Reg decision boundary for LL vs. Area')
+xlabel('Line Length')
+ylabel('Area')
+legend('Artifact Region', 'HFO Region', 'Artifact', 'HFO')
+
+
+%%
+% <latex>
+% \subsection*{3.6 Observations}
+% K-NN has clearly overfit the data by the furthest while logistic
+% regression has underfit the data by the furthest. We also see that K-NN
+% has the most jagged decision boundary whilest SVM has a very curvatious
+% boundary.
+% </latex>
+
+
+%%
+% <latex>
+% \section*{4 Cross-Validation}'
+% </latex>
+
+
+%%
+% <latex>
+% \subsection*{4.1 10 unique folds}'
+% </latex>
+
+clear folds
+indices = randperm(length(trainFeats(:,1)));
+folds{10} = trainFeats(1);
+for i = 1:10
+    s = max(1,round(length(indices)/10 * (i-1) + 1));
+    e = min(length(indices), round(length(indices)/10 * i));
+    folds{i} = indices(s:e)';
+end
+
+length(unique([folds{:}]))
+
+
+%%
+% <latex>
+% \subsection*{4.2.a Validation Error}'
+% </latex>
+
+
+[n, d] = size(trainFeats);
+fold_n = 10;
+fold_len = n / fold_n;
+
+train_folds = zeros(fold_len * (fold_n - 1), d);
+train_fold_class = zeros(fold_len * (fold_n - 1), 1);
+test_folds = zeros(fold_len, d);
+test_fold_class = zeros(fold_len, 1);
+incorrect_pred = 0;
+
+for i = 1:fold_n 
+    f_cnt = 0;
+
+    % generate test and train sets
+    for j = 1:10
+    
+        s = fold_len * (j - 1) + 1;
+        e = fold_len * j;
+        
+        if i == j
+            
+            test_folds(1:fold_len, 1:d) = trainFeats(folds{j}, 1:d);
+            test_fold_class(1:fold_len) = train_classes(folds{j});
+            
+        else
+            f_cnt = f_cnt + 1;
+
+            fold_s = fold_len * (f_cnt - 1) + 1;
+            fold_e = fold_len * f_cnt;
+            
+            train_folds(fold_s:fold_e, 1:d) = trainFeats(folds{j}, 1:d);
+            train_fold_class(fold_s:fold_e) = train_classes(folds{j});
+        end
+    end
+    
+    % run learning algorithms
+    knn_pred_test = knnclassify(test_folds, train_folds, train_fold_class);
+    incorrect_pred = incorrect_pred + sum(knn_pred_test ~= test_fold_class);
+    
+end
+validation_error = incorrect_pred / n
+
+%%
+% <latex>
+% \subsection*{4.2b}'
+% The error is higher. Since the training set leaves out the testing fold,
+% when we go to fit the testing fold to the model, we are matching up
+% points to the nearest neighbor wheras before we were matching those
+% points to themselves. Ultimately, we are avoiding testing on data that we
+% trained on so we would expect a higher error rate. 
+% </latex>
+
+
+%%
+% <latex>
+% \subsection*{4.3a validation error }'
+% </latex>
+
+
+knn_train_error = zeros(1,30);
+validation_error = zeros(1,30);
+
+for k = 1:30
+    train_folds = zeros(fold_len * (fold_n - 1), d);
+    train_fold_class = zeros(fold_len * (fold_n - 1), 1);
+    
+    test_folds = zeros(fold_len, d);
+    test_fold_class = zeros(fold_len, 1);
+    incorrect_pred = 0;
+
+    for i = 1:fold_n 
+        f_cnt = 0;
+
+        % generate test and train sets
+        for j = 1:fold_n
+
+            s = fold_len * (j - 1) + 1;
+            e = fold_len * j;
+
+            if i == j
+
+                test_folds(1:fold_len, 1:d) = trainFeats(folds{j}, 1:d);
+                test_fold_class(1:fold_len) = train_classes(folds{j});
+
+            else
+                f_cnt = f_cnt + 1;
+
+                fold_s = fold_len * (f_cnt - 1) + 1;
+                fold_e = fold_len * f_cnt;
+
+                train_folds(fold_s:fold_e, 1:d) = trainFeats(folds{j}, 1:d);
+                train_fold_class(fold_s:fold_e) = train_classes(folds{j});
+            end
+        end
+
+        % run learning algorithms
+        knn_pred_test = knnclassify(test_folds, train_folds, train_fold_class, k);
+       
+        incorrect_pred = incorrect_pred + sum(knn_pred_test ~= test_fold_class);
+        
+    end
+    
+    knn_pred_train = knnclassify(trainFeats, trainFeats, train_classes, k);
+    knn_train_error(k) = sum(train_classes ~= knn_pred_train')/length(train_classes);
+    validation_error(k) = incorrect_pred / (fold_len * fold_n);
+
+end
+
+figure(7)
+hold on 
+plot(1:30, validation_error, 'b-o');
+plot(1:30, knn_train_error, 'r-o');
+title('Validation and training error for k-NN')
+xlabel('k')
+ylabel('error')
+legend('validation error', 'training error')
+
+%%
+% <latex>
+% \subsection*{4.3b optimal k}'
+% </latex>
+
+[lowest_error, best_k] = min(validation_error)
+
+
+%%
+% <latex>
+% \subsection*{4.3c overfitting with large k's}
+% If k gets large k-nn overfits less because for any given point, the
+% influence it has on a prediction goes down to 1/k. Increasing k
+% effectively smooths over the decision surface.
+% </latex>
+
+
+%%
+% <latex>
+% \subsection*{4.4.a learning with an optimal k}
+% </latex>
+
+
+knn_pred_test = knnclassify(testFeats,trainFeats, train_classes, best_k);
+knn_test_error = sum(knn_pred_test' ~= test_classes)/length(test_classes)
+
+
+
+%%
+% <latex>
+% \subsection*{4.4.a learning with an optimal k}
+% The cross-validated model's testing error is less than the error from the
+% model trained in question 3.3. The best model from question 3.3 used
+% support vectors.
+% </latex>
+
+
+##### SOURCE END #####
+--></body></html>
