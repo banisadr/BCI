@@ -1,0 +1,189 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>BE521HW0_mlautman</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-02-18"><meta name="DC.source" content="BE521HW0_mlautman.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1></h1><!--introduction--><p></p><!--/introduction--><p></p><p></p><p></p><pre class="codeinput">clear; clc; clf; close <span class="string">all</span>;
+dataset = <span class="string">'I521_A0001_D001'</span>;
+me = <span class="string">'mlautman'</span>;
+pass_file = <span class="string">'mla_ieeglogin.bin'</span>;
+[T,session] = evalc(<span class="string">'IEEGSession(dataset, me, pass_file)'</span>);
+disp(session)
+</pre><pre class="codeoutput">  &lt;a href="matlab:help('IEEGSession')"&gt;IEEGSession&lt;/a&gt;:
+
+      server: 'ieeg.org'
+    userName: 'mlautman'
+        data: [1x1 IEEGDataset]
+
+  &lt;a href="matlab:methods(IEEGSession)"&gt;Methods&lt;/a&gt;, &lt;a href="matlab:IEEGObject.openPortalSite()"&gt;main.ieeg.org&lt;/a&gt;
+
+</pre><p></p><pre class="codeinput">data=session.data;
+sample_rate = data.sampleRate;
+disp(sample_rate)
+</pre><pre class="codeoutput">       32051
+
+</pre><p></p><pre class="codeinput">recording_length= data.channels(1).getNrSamples;
+recording_length_s = recording_length/sample_rate;
+disp(recording_length_s)
+</pre><pre class="codeoutput">    10
+
+</pre><p></p><pre class="codeinput">s_s = 8.75;
+e_s = s_s + .5;
+s = max(round(s_s*sample_rate), 1);
+e = min(round(e_s*sample_rate), recording_length);
+vals = data.getvalues(s:e,1);
+figure(1);
+plot(<span class="keyword">...</span>
+    (s:e)./data.sampleRate, <span class="keyword">...</span>
+    vals, <span class="keyword">...</span>
+    <span class="string">'color'</span>, <span class="keyword">...</span>
+    <span class="string">'b'</span> <span class="keyword">...</span>
+);
+xlim([s_s, e_s]);
+ylabel(<span class="string">'Voltage (mV)'</span>, <span class="string">'FontSize'</span>,10,<span class="string">'FontWeight'</span>,<span class="string">'bold'</span>);
+xlabel(<span class="string">'Time (S)'</span>, <span class="string">'FontSize'</span>,10,<span class="string">'FontWeight'</span>,<span class="string">'bold'</span>);
+title(<span class="string">'Three spikes from IEEG dataset I521\_A0001\_D001'</span>, <span class="string">'FontSize'</span>,12,<span class="string">'FontWeight'</span>,<span class="string">'bold'</span>);
+print <span class="string">-dpng</span> <span class="string">./img/three_spikes_matlab</span>
+</pre><img vspace="5" hspace="5" src="BE521HW0_mlautman_01.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%%
+% <latex>
+% \title{BE 521 - Homework 0\\{\normalsize Spring 2015}}
+% \author{Mike Lautman}
+% \date{\today}
+% \maketitle
+% </latex>
+
+%%
+% <latex>
+% \section*{1. Unit Activity}
+% </latex>
+%%
+% <latex>
+% \subsection*{1.1 IEEG portal spikes}
+% \includegraphics[width=400]{./img/three_peaks_IEEg.png}.
+% </latex>
+
+%%
+% <latex>
+% \subsection*{1.2 Grab data from IEEG}
+% </latex>
+
+clear; clc; clf; close all;
+dataset = 'I521_A0001_D001';
+me = 'mlautman';
+pass_file = 'mla_ieeglogin.bin';
+[T,session] = evalc('IEEGSession(dataset, me, pass_file)');
+disp(session)
+
+
+
+%%
+% <latex>
+% \subsection*{1.3 sample_rate}
+% </latex>
+
+data=session.data;
+sample_rate = data.sampleRate;
+disp(sample_rate)
+
+%%
+% <latex>
+% \subsection*{1.4 recording length}
+% </latex>
+
+recording_length= data.channels(1).getNrSamples;
+recording_length_s = recording_length/sample_rate;
+disp(recording_length_s)
+
+%%
+% <latex>
+% \subsection*{1.5 same window}
+% </latex>
+
+s_s = 8.75;
+e_s = s_s + .5;
+s = max(round(s_s*sample_rate), 1);
+e = min(round(e_s*sample_rate), recording_length);
+vals = data.getvalues(s:e,1);
+figure(1);
+plot(...
+    (s:e)./data.sampleRate, ...
+    vals, ...
+    'color', ...
+    'b' ...
+);
+xlim([s_s, e_s]);
+ylabel('Voltage (mV)', 'FontSize',10,'FontWeight','bold');
+xlabel('Time (S)', 'FontSize',10,'FontWeight','bold');
+title('Three spikes from IEEG dataset I521\_A0001\_D001', 'FontSize',12,'FontWeight','bold');
+print -dpng ./img/three_spikes_matlab
+
+
+
+
+##### SOURCE END #####
+--></body></html>
