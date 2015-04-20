@@ -341,6 +341,9 @@ accuracy_2 = sum(pred == T)/length(T);
 %%
 % <latex>
 % \subsection*{3.1 play}
+% After working with the data for sometime, the best accuracy achieved was 
+% in the 50\% range. With more time, I am sure that I would be able to get 
+% that number into the 90\% range. 
 % </latex>
 
 
@@ -358,32 +361,32 @@ accuracy_2 = sum(pred == T)/length(T);
 % end
 
 %% generate lpf filter
-order = 10;
-% Pass band Ripple in dB
-Rp = .01;    
-% Stop band Ripple in dB
-Rs = 10;    
-% Edge frequency in Hz
-e_f = 3;  
-% Normalized Edge frequency in pi * rad/sample
-Wp = e_f / 240 * 2*pi;   
-% Design low pass filter
-[b,a] = ellip(order, Rp, Rs, Wp, 'low'); 
-
-subsample = 1;
-ss_mask = 1:subsample:size(neurons,1);
-electrode_mask = 1:64;
-neuronMASS = zeros(length(ss_mask), length(electrode_mask));
-
-for i = 1:length(electrode_mask)
-    ch = electrode_mask(i);
-    MA = filter(b,a, neurons(:,ch));
-    neuronMASS(:,i) = MA(ss_mask);
-end
-
+% order = 10;
+% % Pass band Ripple in dB
+% Rp = .01;    
+% % Stop band Ripple in dB
+% Rs = 10;    
+% % Edge frequency in Hz
+% e_f = 3;  
+% % Normalized Edge frequency in pi * rad/sample
+% Wp = e_f / 240 * 2*pi;   
+% % Design low pass filter
+% [b,a] = ellip(order, Rp, Rs, Wp, 'low'); 
+% 
+% subsample = 1;
+% ss_mask = 1:subsample:size(neurons,1);
+% electrode_mask = 1:64;
+% neuronMASS = zeros(length(ss_mask), length(electrode_mask));
+% 
+% for i = 1:length(electrode_mask)
+%     ch = electrode_mask(i);
+%     MA = filter(b,a, neurons(:,ch));
+%     neuronMASS(:,i) = MA(ss_mask);
+% end
+% 
 
 %% vectorize the testing and training sets
-n_vec = reshape(neuronMASS', [240/subsample * length(electrode_mask), 85 * 180])';
+% n_vec = reshape(neuron', [240/subsample * length(electrode_mask), 85 * 180])';
 
 % %% separate test and training sets
 % s_train = 1;
@@ -395,55 +398,65 @@ n_vec = reshape(neuronMASS', [240/subsample * length(electrode_mask), 85 * 180])
 % label_train = S_t(s_train:e_train)';
 % neurons_test = n_vec(s_test:e_test, :);
 % label_test = S_t(s_test:e_test)';
+% 
 
-%%
-p300_score = zeros(length(S_t),64);
-cnt = 0;
-for epoch = 1:85
-    column = zeros(180,1);
-    for iteration = 1:180
-        cnt = cnt + 1;
-        s = ((epoch - 1) * 180 + (iteration - 1)) * 240  + 1;
-        e = s + 240 - 1;
-        for channel  = 1:64
-            sample = neuronMASS(s:e, channel);
-            p300_score(iteration, channel) = ...
-                mean(sample(score_1:score_2)) - mean(sample(score_3:score_4));
-        end
-    end
-
-%     sorted_scores = zeros(15,12);
-%     for i=1:12
-%         sorted_scores(:,i) = p300_score(column==i);
-%     end
-%     
-%     mean_ss = mean(sorted_scores,1);
-%     [m, col] = max(mean_ss(1:6));
-%     [m, row] = max(mean_ss(7:12));
-%     letters{epoch} = ref(row, col);
-end
-
-%% train a SVM 
-model = svmtrain(neurons_train, label_train, 'kernel_function', 'rbf', 'rbf_sigma', 1);
-pred = svmclassify(model, neurons_test);
+%% train a SVM on the p300 scores
+% model = svmtrain(neurons_train, label_train, 'kernel_function', 'rbf', 'rbf_sigma', 1);
+% pred = svmclassify(model, neurons_test);
 % svm_model = svmtrain(label_train, neurons_train, '-s 0 -t 2 -b 1');
 % [predicted_label, accuracy, pred_prob] = svmpredict(label_test, neurons_test, svm_model);
 
-%% CV
-% svm_model = svmtrain(S_t', n_vec, '-s 2 -t 2 -v 2');
+% p300_score = zeros(length(S_t),64);
+% column = zeros(length(S_t),1);
+% cnt = 0;
+% 
+% for epoch = 1:85
+%     for iteration = 1:180
+%         cnt = cnt + 1;
+%         s = ((epoch - 1) * 180 + (iteration - 1)) * 240  + 1;
+%         e = s + 240 - 1;
+%         column(cnt) = S_d(iteration + 180 * (epoch - 1));
+%         for channel  = 1:64
+%             sample = neurons(s:e, channel);
+%             p300_score(cnt, channel) = ...
+%                 mean(sample(score_1:score_2)) - mean(sample(score_3:score_4));
+%         end
+%     end
+% % 
+% %     sorted_scores = zeros(15,12);
+% %     for i=1:12
+% %         sorted_scores(:,i) = p300_score(column==i);
+% %     end
+% end
 
+%% train a SVM 
+% model = svmtrain(p300_score(1:(50*180),:), S_t(1:(50*180)), 'kernel_function', 'rbf', 'rbf_sigma', 1);
+% pred = svmclassify(model, p300_score((50*180+1):(85*180),:));
 
-
+%% AdaBoost with decision Trees
+% ens=fitensemble(neurons_train, label_train, 'AdaBoostM1',100,'Tree');
+% pred = predict(ens, neurons_test)
 %%
 % <latex>
 % \subsection*{3.2 method}
 % For this section I used a SVM with a RBF kernel. For computational
-% ease, I smoothed the EEG responses using moving average filter, and then
-% subsampled the smooth signals to a frequency of 10hz. This gave 640
-% features which is a reasonable number for a SVM. I then trained SVM's
-% with different kernels and different tuning parameters to get the best
-% possible accuracy. For whatever reason, this method did not succeed at
-% all.
+% ease, I tried two methods to reduce the dimensionality of the feature 
+% vector. First I smoothed out the EEG responses using a low pass filter, 
+% and then subsampled the smooth signals. Using this method, I was able to
+% preserve the low frequency characteristics of the wave with as few as 24
+% points per signal. Knowing that some electrodes are more useful than
+% others, I also experimented with different combinations of electrodes. By
+% limiting our scope to the 9 most influential electrodes, we were able to
+% get the feature vector down to a length of 216. A very computationally
+% feasible length. Unfortunately, the svm's had a lot of trouble
+% converging with 9000 training samples. This is most likely due to issues
+% in matlab's implementation of SVMs since similar tests in python
+% converged without issue. In the hopes of getting useful results in
+% matlab, we also applied SVMs to the p300 scores to see if that helped our
+% accuracy over the max mean method. This resulted in an accuracy of 50\%.
+% The third algorithm we tried was AdaBoost with decisiion trees as the
+% base classifier. This method had the higest accuracy yeilding the highest
+% accuracy scores in the low 50\%s. 
 % </latex>
 
 %% Clean up
