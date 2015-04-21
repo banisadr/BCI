@@ -6,6 +6,11 @@ recovered = zeros(size(signal));
 for i=1:size(downsampled,1)
     recovered((i-1)* r + 1:i*r,:) = bsxfun(@times, downsampled(i,:) ,ones(r,1));
 end
+% figure
+% subplot(2,1,1)
+% plot(signal)
+% subplot(2,1,2)
+% plot(recovered)
 
 corr_scores = zeros(1,size(downsampled,2)); 
 for i = 1:size(downsampled,2)

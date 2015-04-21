@@ -1,0 +1,5 @@
+Notes
+	- The lag between the dataglove position measure- ment recording and the amplifier measurement is 37ms
+	- There is a characteristic delay between brain activ- ity and resulting finger movement.
+	- The glove data is supersampled. original sampling frequecy is 40 hz. 
+	
